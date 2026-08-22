@@ -1,4 +1,4 @@
-# auto-video-editing（專案藍圖）
+# youtube-publish-kit（專案藍圖）
 
 > 本檔為跨 Agent 通用的專案藍圖（AGENTS.md 開放標準）。任何 Agent 的每個 session 都應先讀本檔＋`HANDOFF.md`。
 > Codex、OpenCode、Antigravity 原生就讀本檔；Claude Code 不讀 `AGENTS.md`，改由 `CLAUDE.md` 的 `@AGENTS.md` import 進來，Claude 專屬規範寫在 `CLAUDE.md`。
@@ -23,7 +23,7 @@
 ## 資料夾結構
 
 ```
-auto-video-editing/
+youtube-publish-kit/
 ├── AGENTS.md         # 本檔 — 跨 Agent 專案藍圖
 ├── CLAUDE.md         # Claude Code 橋接（@AGENTS.md + Claude 專屬）
 ├── HANDOFF.md        # 交接檔（不進 git，只走雲端硬碟同步）
@@ -133,8 +133,8 @@ auto-video-editing/
 | 層級 | 平台 | 位置 | 讀取時機 |
 |------|------|------|---------|
 | L1 | 本地（GDrive） | `AGENTS.md`＋`HANDOFF.md`（不進 git，只走雲端硬碟）＋`CLAUDE.md`（橋接） | 每個 session |
-| L2 | GitHub | [changyiwu/auto-video-editing](https://github.com/changyiwu/auto-video-editing)（公開） | 指定時 |
-| L3 | Obsidian | `auto-video-editing/專案工作流程.md` | 有需要時 |
+| L2 | GitHub | [changyiwu/youtube-publish-kit](https://github.com/changyiwu/youtube-publish-kit)（公開） | 指定時 |
+| L3 | Obsidian | `youtube-publish-kit/專案工作流程.md` | 有需要時 |
 
 ## 三個檔案的職責（依「時效性」分家，不是依「詳細程度」）
 

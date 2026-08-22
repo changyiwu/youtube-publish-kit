@@ -1,4 +1,4 @@
-# auto-video-editing — YouTube 影片自動化生產線
+# youtube-publish-kit — YouTube 上架素材自動化生產線
 
 把原始影片素材丟進來，AI agent 接力產出：剪好的影片、SRT 字幕、純文字稿、封面圖、YouTube 描述、社群貼文、SEO 標籤。
 
