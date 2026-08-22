@@ -66,4 +66,4 @@
 
 1. **轉錄階段**：由技能組裝成 `--initial_prompt` 字串餵給 Whisper／Groq
 2. **清字階段**：agent 讀本檔，遇到相近音的詞替換成正確名稱
-3. 能**機械式**判定的替換寫進 `scripts/apply_vocab.py` 的 `REPLACEMENTS`；需要看上下文才能判斷的留給清字階段
+3. 能**機械式**判定的替換寫進 `references/replacements.md` 的表格；需要看上下文才能判斷的留給清字階段

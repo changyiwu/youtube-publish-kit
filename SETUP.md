@@ -74,7 +74,7 @@
 | **頻道封面風格** | `assets/style/cover-style.md` | 目前是模板，把所有 `<...>` 佔位符換成你的色票、構圖、字體、配色規則 |
 | **頻道封面參考圖** | `assets/style/reference-thumbnails.png` | （選填）截你頻道現有 9–12 張封面拼成一張。agent 生封面前會讀它學風格 |
 | **字幕詞彙表** | `skills/youtube-video-workflow/references/vocabulary.md`（與 `skills/audio-to-srt/references/vocabulary.md` 同步） | 把「頻道／人物」段換成你的頻道名與常出現的人名，補上你常講的專有名詞 |
-| **詞彙機械替換** | `skills/youtube-video-workflow/scripts/apply_vocab.py`（與 `skills/audio-to-srt/scripts/` 同步） | `REPLACEMENTS` 加入你內容裡「Whisper 常聽錯 → 正確」的對照 |
+| **詞彙機械替換** | `skills/youtube-video-workflow/references/replacements.md`（與 `skills/audio-to-srt/references/` 同步） | 在表格加一列「聽成 → 正確」。不想動技能本體就改 `~/.audio-to-srt/replacements.md`，會先於內建規則執行 |
 | **疑慮術語掃描** | `.../scripts/find_dubious_terms.py` | `DEFAULT_TERMS` 加入你常講、容易被聽錯的專有名詞 |
 | **行銷語氣** | `skills/youtube-video-workflow/references/marketing-spec.md` | 調整貼文口吻、字數、Emoji 規則 |
 | **GitHub repo** | `AGENTS.md` | 要做版控就 `git init` 並把 `<你的帳號>/<你的 repo>` 填上 |

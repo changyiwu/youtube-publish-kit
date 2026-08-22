@@ -74,7 +74,7 @@ youtube-publish-kit/
 | `skills/short-video-workflow/` | 長片跑完後加碼剪 Shorts |
 | `skills/cover-image/` | Agent 沒有內建生圖時才用 |
 
-總控技能是**自帶腳本的可攜版本**，跑生產線時用它自己 `scripts/` 內的腳本；其餘技能是拆開的單步驟版本。兩邊腳本內容相同（md5 一致），改其中一邊要同步另一邊。
+總控技能是**自帶腳本的可攜版本**，跑生產線時用它自己 `scripts/` 內的腳本；其餘技能是拆開的單步驟版本。兩邊的 `scripts/` 與 `references/replacements.md` 內容相同（md5 一致），改其中一邊要同步另一邊。
 
 同步技能到四個 Agent 的全域目錄：用全域 `sync-skills` 技能。
 

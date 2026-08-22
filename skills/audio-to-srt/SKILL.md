@@ -89,12 +89,19 @@ python ".../scripts/apply_vocab.py" \
   _subtitles/輸入檔.raw.srt \
   --out _subtitles/輸入檔.vocab.srt
 ```
-腳本內含 REPLACEMENTS 清單：
+規則**不在程式裡**，讀 `references/replacements.md`（表格由上到下依序執行，順序有意義）：
+- **保護詞**：`Google Cloud`、`Cloudflare`、`iCloud`、`SoundCloud` 等替換前先遮蔽、跑完還原
 - **GPT-Codex 變體**（含 DexDex/Dex Dex/dex dex → Codex）：必須最先處理，避免 Cloud→Claude 後誤判
+- **Antigravity / Netlify / clasp / Apps Script** 等工具名誤聽
 - **Claude 生態**：ClockCode/CloudCode/ClawCode → Claude Code、克勞德 → Claude
 - **Cloud → Claude**（放最後，避免先動到 Cloud Code）
-- **NotebookLM、GPT-Image 2** 等其他 AI 工具
-- **常見錯字**：斷考→段考、烤卷→考卷 等（自己的常見誤聽請補進 `REPLACEMENTS`）
+- **常見錯字**：斷考→段考、烤卷→考卷 等
+
+英文規則會自動加詞邊界（`Cloud → Claude` 不會動到 `iCloud`）；**中文規則沒有邊界可言**，
+凡是可能出現在正常語句裡的中文字串一律別寫進去，交給清字階段判斷。
+
+自己的規則放 `~/.audio-to-srt/replacements.md`（格式相同，先於內建規則執行，升級不會被覆蓋），
+要暫時停用加 `--no-user-rules`。
 
 **只動文字行，時間碼絕不動。**
 
@@ -169,6 +176,7 @@ skills/audio-to-srt/
 │   └── validate_srt.py           # 時間碼驗證
 └── references/
     ├── cleanup_rules.md          # 清字規則（逐段不跨段）
+    ├── replacements.md           # 機械替換規則＋保護詞（apply_vocab.py 讀這份）
     └── vocabulary.md             # 自訂詞彙表
 ```
 

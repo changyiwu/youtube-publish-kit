@@ -66,7 +66,7 @@ project/
 | 項目 | 要改什麼 |
 |------|---------|
 | `references/vocabulary.md` | 換成自己的頻道名、人名、產品名與常用術語 |
-| `scripts/apply_vocab.py` 的 `REPLACEMENTS` | 加入自己內容裡「Whisper 常聽錯 → 正確」的對照 |
+| `references/replacements.md` 的表格 | 加入自己內容裡「Whisper 常聽錯 → 正確」的對照；個人規則可放 `~/.audio-to-srt/replacements.md` |
 | `scripts/find_dubious_terms.py` 的 `DEFAULT_TERMS` | 加入自己常講、容易被聽錯的專有名詞 |
 | `references/marketing-spec.md` | 調整貼文口吻、字數、Emoji 規則與平台規格 |
 | `assets/persona/` | 放自己的人物基準照（原始照，不是生成圖） |

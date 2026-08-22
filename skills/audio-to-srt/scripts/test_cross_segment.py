@@ -176,5 +176,72 @@ class TestFinalize(unittest.TestCase):
         self.assertIn("AGE", clean[1][2])  # 段號規則只動 390
 
 
+
+class TestBoundaryAndProtect(unittest.TestCase):
+    """詞邊界守衛與保護詞（規則外移後才有的行為，2026-08-23 併入）。"""
+
+    def _clean(self, text):
+        with tempfile.TemporaryDirectory() as d:
+            src = Path(d) / "in.srt"
+            dst = Path(d) / "out.srt"
+            src.write_bytes(
+                make_srt([("1", "00:00:00,000 --> 00:00:02,000", text)]).encode("utf-8")
+            )
+            apply_vocab.process_srt(src, dst)
+            self.assertEqual(validate_srt.validate(src, dst), 0)
+            return parse(dst)[0][2]
+
+    def test_boundary_protects_icloud(self):
+        # 詞邊界：Cloud -> Claude 不可動到 iCloud 的字尾
+        self.assertEqual(self._clean("備份在iCloud裡面"), "備份在iCloud裡面")
+
+    def test_protect_word_cloudflare(self):
+        # 保護詞：Cloudflare 前後都是中文，邊界守衛救不了，靠遮蔽
+        self.assertEqual(self._clean("部署到Cloudflare上"), "部署到Cloudflare上")
+
+    def test_protect_word_google_cloud(self):
+        # 保護詞：Google Cloud 前後是空白，邊界檢查會放行
+        self.assertEqual(self._clean("他用 Google Cloud 跑"), "他用 Google Cloud 跑")
+
+    def test_bare_cloud_still_replaced(self):
+        # 反面：獨立的 Cloud 仍要被改成 Claude，保護不能保過頭
+        self.assertEqual(self._clean("我用 Cloud 寫程式"), "我用 Claude 寫程式")
+
+    def test_protect_word_across_segment_boundary(self):
+        # 保護詞被切在段界：Cloud + flare 接合後仍應整個受保護
+        src = make_srt([
+            ("1", "00:00:00,000 --> 00:00:02,000", "部署到Cloud"),
+            ("2", "00:00:02,000 --> 00:00:04,000", "flare 上面"),
+        ])
+        with tempfile.TemporaryDirectory() as d:
+            s_ = Path(d) / "in.srt"
+            dst = Path(d) / "out.srt"
+            s_.write_bytes(src.encode("utf-8"))
+            apply_vocab.process_srt(s_, dst)
+            self.assertEqual(validate_srt.validate(s_, dst), 0)
+            clean = parse(dst)
+        joined = clean[0][2] + clean[1][2]
+        self.assertIn("Cloudflare", joined)
+        self.assertNotIn("Claude", joined)
+
+    def test_rules_file_is_source_of_truth(self):
+        # 規則外移：改規則檔就會改行為，不必動程式碼
+        with tempfile.TemporaryDirectory() as d:
+            rules = Path(d) / "r.md"
+            rules.write_text(
+                "# 測試規則\n\n## 保護詞\n\n- `SoundCloud`\n\n"
+                "## 替換規則\n\n| 聽成 | 正確 | 邊界 |\n|---|---|---|\n"
+                "| `Cloud` | `Claude` | |\n",
+                encoding="utf-8",
+            )
+            protect, rs = apply_vocab.load_rules(rules, use_user_rules=False)
+            self.assertEqual(protect, ["SoundCloud"])
+            self.assertEqual(len(rs), 1)
+            out = apply_vocab.apply_cross_segment(
+                ["丟到SoundCloud跟 Cloud 上"], protect, rs
+            )[0]
+            self.assertEqual(out, "丟到SoundCloud跟 Claude 上")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
