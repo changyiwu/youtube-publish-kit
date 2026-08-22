@@ -1,0 +1,55 @@
+# Google Drive 系統檔
+desktop.ini
+*.tmp
+~$*
+.DS_Store
+
+# 敏感資料
+.env
+!.env.example
+*.key
+credentials.*
+*.pem
+
+# 人物形象照（個人隱私，不進 git）
+assets/persona/*.png
+assets/persona/*.jpg
+assets/persona/*.jpeg
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 影片原始素材與成品（太大，不進 git）
+raw/**
+output/final/**
+working/**
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+*.wav
+*.mp3
+*.m4a
+
+# 但保留資料夾結構
+!raw/.gitkeep
+!output/final/.gitkeep
+!working/.gitkeep
+
+# 中間字幕檔（依需求可移除這條）
+**/_subtitles/
+
+# 圖片暫存
+generated/
+
+# Claude Code worktrees（本機暫存，不進 git）
+.claude/worktrees/
+
+# 交接檔含真實電腦名與本機路徑，只走雲端硬碟同步，不進公開 repo
+HANDOFF.md
+
+# Claude Code 本機權限設定（個人設定，不進 repo）
+.claude/settings.local.json

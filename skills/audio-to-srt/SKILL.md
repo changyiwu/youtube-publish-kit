@@ -1,0 +1,190 @@
+---
+name: audio-to-srt
+description: 音訊/影片檔自動生成乾淨 SRT 字幕檔。當使用者要「把音訊轉字幕」「做 SRT」「語音轉文字 + 時間碼」「影片上字幕」時請一定要使用此技能。預設走 Groq Whisper-large-v3-turbo（雲端、word-level 時間碼），備援本地 Whisper medium。逐段清字並嚴守時間碼對齊。四種 agent（Claude Code／Codex／OpenCode／Antigravity）共用。
+---
+
+# audio-to-srt：音訊 → 乾淨 SRT
+
+## 何時觸發
+使用者提供音訊/影片檔（mp3/wav/m4a/mp4/mov/mkv）並要求：
+- 轉字幕、生成 SRT、上字幕
+- 語音轉文字且要有時間碼
+- 字幕清洗、修錯字、潤斷句
+
+## 兩條路線
+
+| 路線 | 模型 | 時間碼粒度 | 速度 | 隱私 | 適用 |
+|------|------|------------|------|------|------|
+| **A. Groq（預設）** | whisper-large-v3-turbo | **word-level** | 快 | 上雲 | 一般情境，要快要準 |
+| B. 本地 Whisper | medium | segment-level | 慢 | 完全本地 | 敏感內容、無網路 |
+
+走 Groq 才能用 `resegment.py` 做精準斷句。本地 Whisper 只能保留原 segment。
+
+## 核心原則（最重要，違反即失敗）
+
+1. **時間碼神聖不可侵犯**：清字過程 SRT 每塊的 `HH:MM:SS,mmm --> HH:MM:SS,mmm` 那一行**完全不准改動**
+2. **段落邊界不可動**：清字階段不得合併兩段、不得拆分一段、不得新增或刪除段落（resegment 階段才能切，且以 word-level 時間碼為準）
+3. **只改文字，不改語意**：修錯字、加標點、順語感，但不得增刪內容
+
+---
+
+## 路線 A：Groq 流程（預設）
+
+### Step 1：環境檢查
+```bash
+# Groq API Key（擇一）
+echo $GROQ_API_KEY                # 環境變數
+ls ~/.groq_api_key                # 或本地 key 檔
+```
+若兩者皆無 → 提示使用者設定，並中止。
+
+ffmpeg 確認（大檔降取樣會用到）：
+```bash
+ffmpeg -version 2>&1 | head -1
+```
+
+### Step 2：準備工作目錄
+在音訊檔同層建立 `_subtitles/` 存放中間產物。
+
+### Step 3：大檔自動壓縮（已內建）
+Groq 上限 25 MB，超過會吐 **502 Bad Gateway**（Cloudflare 擋掉）。
+`transcribe_groq.py` 在偵測到檔案 > 24 MB 時，**自動**用 ffmpeg 壓成 16kHz / mono / 32kbps 暫存檔上傳，完成後刪除——使用端無感。78 分鐘片實測從 75 MB → 18 MB，辨識品質仍佳。
+
+若壓縮後仍 > 24 MB（罕見），腳本會中止並提示。屆時手動切段處理。
+
+### Step 4：Groq STT，產出 word-level JSON
+```bash
+python "%USERPROFILE%/.claude/skills/audio-to-srt/scripts/transcribe_groq.py" \
+  "輸入檔.mp3" \
+  --out _subtitles/輸入檔.groq.json
+```
+產出 verbose_json，含 `segments` 與 `words`（每個字都有 start/end）。
+
+### Step 5：依 word-level 時間碼重新斷句 → raw SRT
+```bash
+python ".../scripts/resegment.py" \
+  _subtitles/輸入檔.groq.json \
+  --audio "輸入檔.mp3" \
+  --out _subtitles/輸入檔.raw.srt
+```
+切點優先序：強標點 `。！？` > segment 邊界 > 弱標點 `，、` > 硬切（往回找標點）。
+參數：`MAX_DUR=3.0s`、`MAX_CHARS=15`、`MIN_DUR=0.6s`。
+
+**防孤兒殘尾（2026-07 修正）**：舊版會把「一句話的最後一個字」截到下一段開頭
+（如上段結尾『…需要的程』、下段開頭『式,完全免費!』）。已內建兩層防護：
+1. **前瞻守衛 `punct_ahead()`**：segment 邊界切（規則 2）與硬超標切（規則 5）
+   在動刀前先看後面 1–2 個詞內有沒有標點收尾，有就寬限不切，等標點處自然收尾。
+2. **孤兒救援 `rescue_orphan_tails()`**：切完後最終掃描，凡「前段沒標點收尾」且
+   段首是「≤2 字＋標點」的殘尾，整批搬回前一段。
+   發語詞（『好,』『嗯,』『欸,』…）在兩層都有白名單保護，不會被誤判誤搬。
+實測：兩支 40 分鐘影片的真孤兒殘尾 11→0、16→0，發語詞開頭段完好。
+
+`--audio` 會在斷句後呼叫 `ffmpeg silencedetect` 偵測真實靜音（預設 -35 dB、0.25 s），
+將每段的 end 縮到靜音起點、下一段的 start 延到靜音終點，讓字幕在靜音處自動留白。
+不傳 `--audio` 時維持舊行為（Groq word timestamps 本身無靜音間隔）。
+
+### Step 6：套用詞彙修正（機械式替換）
+```bash
+python ".../scripts/apply_vocab.py" \
+  _subtitles/輸入檔.raw.srt \
+  --out _subtitles/輸入檔.vocab.srt
+```
+腳本內含 REPLACEMENTS 清單：
+- **GPT-Codex 變體**（含 DexDex/Dex Dex/dex dex → Codex）：必須最先處理，避免 Cloud→Claude 後誤判
+- **Claude 生態**：ClockCode/CloudCode/ClawCode → Claude Code、克勞德 → Claude
+- **Cloud → Claude**（放最後，避免先動到 Cloud Code）
+- **NotebookLM、GPT-Image 2** 等其他 AI 工具
+- **常見錯字**：斷考→段考、烤卷→考卷 等（自己的常見誤聽請補進 `REPLACEMENTS`）
+
+**只動文字行，時間碼絕不動。**
+
+### Step 7：逐段精修（由 agent 親自讀、親自改）
+- 讀 `輸入檔.vocab.srt`
+- 依 `references/cleanup_rules.md` 逐段清理（修標點、刪贅詞）
+- 每段只改第 3 行之後的文字
+- 產出 `_subtitles/輸入檔.clean.srt`
+
+**清字檢查清單：**
+- [ ] 段數是否等於 vocab.srt？（不可增減）
+- [ ] 時間碼行是否完全沒動？
+- [ ] `references/vocabulary.md` 詞彙是否正確呈現？
+
+### Step 8：驗證
+```bash
+python ".../scripts/validate_srt.py" \
+  --raw _subtitles/輸入檔.vocab.srt \
+  --clean _subtitles/輸入檔.clean.srt
+```
+段數一致、時間碼逐一吻合、單調遞增、文字非空。
+
+### Step 9：產出純文字稿
+```bash
+python ".../scripts/srt_to_txt.py" \
+  _subtitles/輸入檔.clean.srt \
+  --out 輸入檔.txt
+```
+適合：YouTube 描述、IG/FB 貼文、封面金句、後製字稿。
+
+### Step 10：交付
+**音訊同層放兩份**：
+- `輸入檔.srt` — 字幕檔（複製自 clean.srt）
+- `輸入檔.txt` — 純文字稿
+
+`_subtitles/` 中間檔保留供稽核。
+回報：總段數、總時長、平均段長、txt 字數、主要修改類型。
+
+---
+
+## 路線 B：本地 Whisper 流程（備援）
+
+當使用者明確要求本地處理、或無 Groq Key 時走此路線。
+
+```bash
+PYTHONIOENCODING=utf-8 PYTHONUTF8=1 python -X utf8 -m whisper "輸入檔.mp3" \
+  --model medium \
+  --language zh \
+  --output_format srt \
+  --output_dir ./_subtitles \
+  --initial_prompt "以下為繁體中文。專有名詞：Claude、Claude Code、NotebookLM、Gemini、Groq、Whisper、Obsidian。"
+```
+
+**Windows 踩坑**：
+1. `whisper` CLI 不在 PATH → 用 `python -m whisper`
+2. cp950 寫不了繁中 → 必須加 `PYTHONUTF8=1` 與 `-X utf8`
+
+產出後跳過 Step 5（resegment 不適用，segment-level 時間碼只能照原樣），直接進 Step 6（apply_vocab）→ Step 7（清字）→ Step 8（驗證）→ Step 9（轉純文字）→ Step 10（交付）。
+
+---
+
+## 檔案結構
+
+```
+skills/audio-to-srt/
+├── SKILL.md                      # 本檔
+├── scripts/
+│   ├── transcribe_groq.py        # Groq STT，產 word-level JSON
+│   ├── resegment.py              # 依 word-level 時間碼重新斷句
+│   ├── apply_vocab.py            # 詞彙機械替換（只動文字行）
+│   ├── srt_to_txt.py             # SRT → 純文字稿
+│   └── validate_srt.py           # 時間碼驗證
+└── references/
+    ├── cleanup_rules.md          # 清字規則（逐段不跨段）
+    └── vocabulary.md             # 自訂詞彙表
+```
+
+## 路線選擇決策樹
+
+```
+有 GROQ_API_KEY？
+├─ 有 → 路線 A（Groq）
+│       └─ 檔案 > 25 MB？→ 先 ffmpeg 降至 16k mono 再傳
+└─ 無 → 提示使用者設 key；若使用者要求離線 → 路線 B（本地 Whisper）
+```
+
+## 踩過的坑
+
+- Whisper 辨識準但斷句差 → Groq word-level + resegment 解決
+- 長音訊爆記憶體（本地）→ 改走 Groq；Groq 25 MB 上限 → ffmpeg 降取樣
+- Cloud / Claude / Codex 互相誤判 → apply_vocab 順序講究：先處理 GPT-Codex 變體（含 DexDex），再 Claude，最後 Cloud→Claude
+- Windows cp950 編碼 → 本地路線一律加 `PYTHONUTF8=1`
+- 中文檔名上傳 Groq 編碼壞掉 → transcribe_groq.py 內部改用 `audio.<ext>` 上傳
