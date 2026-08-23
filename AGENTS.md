@@ -112,6 +112,12 @@ youtube-publish-kit/
   不得已的例外要在 `replacements.md` 就地標警語說明何時該停用
 - 英文替換若是「正確詞裡含有待替換字串」（`Cloudflare`、`Google Cloud`），加進 `replacements.md` 的〈保護詞〉，
   光靠詞邊界救不了
+- `replacements.md` 的**規則順序有意義**：先 GPT-Codex 變體 → 再 Claude 生態 → 最後 `Cloud→Claude`。
+  新增規則務必確認插入位置，順序錯了複合詞會被短規則先吃掉
+- `vocabulary.md` 有 **Whisper prompt 長度上限**（約 224 token，腳本抓 200 字），超出的從尾端截掉、
+  **只印警告不報錯**。重要的詞放前面；**加新詞前先決定拿掉哪一個**；`A / B` 這種寫法會被拆成兩個詞條、佔兩個名額
+- 靜音修正只認**跨越段落邊界**的靜音，段內換氣必須忽略（否則字幕會在人還在講的時候消失）；
+  `end` 只能縮短不能延長——word-level 時間碼才是文字何時被說出的依據
 
 ### 封面規範
 
@@ -125,6 +131,14 @@ youtube-publish-kit/
 
 優先序：**人物基準照 > 風格指南 > 個別影片的 prompt 變化**。
 `assets/` 目前是模板狀態，第一次使用前先換成自己的（見 `SETUP.md`）。
+
+### 相容性
+
+- 腳本**不得引入第三方套件**，標準庫寫得出來就用標準庫——`preflight.py` 只驗 ffmpeg／auto-editor，
+  漏裝的 pip 套件會在流程跑到一半才爆
+- 維持 **Python 3.9+ 相容**（別「順手現代化」成 `Path | None` 這類 3.10 語法）
+- 目標平台以 **Windows** 為主：本地 Whisper 路線一律加 `PYTHONUTF8=1` 與 `-X utf8`，否則 cp950 寫不了繁中
+- 中文檔名上傳 Groq 會壞編碼，`transcribe_groq.py` 內部一律改用 `audio.<ext>` 上傳
 
 ### 安全與隱私
 
