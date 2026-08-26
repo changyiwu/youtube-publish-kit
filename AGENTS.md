@@ -74,7 +74,17 @@ youtube-publish-kit/
 | `skills/short-video-workflow/` | 長片跑完後加碼剪 Shorts |
 | `skills/cover-image/` | Agent 沒有內建生圖時才用 |
 
-總控技能是**自帶腳本的可攜版本**，跑生產線時用它自己 `scripts/` 內的腳本；其餘技能是拆開的單步驟版本。兩邊的 `scripts/` 與 `references/replacements.md` 內容相同（md5 一致），改其中一邊要同步另一邊。
+總控技能是**自帶腳本的可攜版本**，跑生產線時用它自己 `scripts/` 內的腳本；其餘技能是拆開的單步驟版本。兩邊的 `scripts/` 與 `references/` 內容逐位元相同，改其中一邊**必須**同步另一邊。
+
+**不要為了消滅重複，把總控改成引用 `../<單步驟技能>/scripts/`。** 技能的消費方式是被 `sync-skills` 複製進各 Agent 的全域目錄，只裝總控沒裝單步驟技能時，跨資料夾引用會整條線壞掉——可攜正是選這個設計的理由。重複是刻意付的代價，用下面的檢查把代價壓住。
+
+`scripts/check_sync.py` 驗證這份重複：逐檔比對 sha256，並抓「單步驟技能新增了檔案卻沒登記」的清單漂移。
+
+- `preflight.py` 會順帶跑它，不同步時只印 `[WARN]` **不擋關**——副本不同步不影響這台機器跑不跑得動，但會讓產出偷偷用到舊版腳本
+- 要當硬關卡就直接跑 `python skills/youtube-video-workflow/scripts/check_sync.py`，不一致 exit 1
+- 新增或刪除共用檔案時，**同時更新 `check_sync.py` 的 `MANIFEST`**（要共用）或 `EXEMPT`（不共用，例如只在單步驟技能裡的測試）。沒登記會直接讓檢查失敗，這是刻意的
+
+單步驟需求（只想轉字幕、只想去靜音）一律走**本 repo 內的單步驟技能**，跑一次 `sync-skills` 裝到全域後，在任何資料夾都能觸發。**不要為此另開或依賴外部 repo**——`agents/audio-to-srt` 是本 repo 字幕技能的前身，改良已全數併入（dc4cb12），該專案待退役，不得反向依賴。
 
 同步技能到四個 Agent 的全域目錄：用全域 `sync-skills` 技能。
 

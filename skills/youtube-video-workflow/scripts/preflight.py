@@ -67,6 +67,25 @@ def groq_key_status() -> bool:
     return False
 
 
+def sync_status() -> bool:
+    """檢查總控自帶的可攜副本是否與單步驟技能一致。
+
+    刻意只警告、不擋關：副本不同步會讓產出偷偷用到舊版腳本，但不影響「這台機器跑不跑得動」，
+    而 preflight 判定的是後者。要當硬關卡時直接跑 check_sync.py（不一致會 exit 1）。
+    """
+    try:
+        from check_sync import check
+    except ImportError as exc:
+        print(f"[WARN] 無法載入 check_sync：{exc}")
+        return False
+
+    skills_root = Path(__file__).resolve().parents[2]
+    if check(skills_root, quiet=True) != 0:
+        print("[WARN] 上列副本不同步；剪輯仍可執行，但流程可能用到舊版腳本")
+        return False
+    return True
+
+
 def main() -> int:
     print(f"[OK] Python: {sys.version.split()[0]} ({sys.executable})")
     python_ok = sys.version_info >= (3, 10)
@@ -77,6 +96,7 @@ def main() -> int:
     ffprobe_ok = tool_status("ffprobe")
     editor_ok = auto_editor_status()
     groq_key_status()
+    sync_status()
 
     required_ok = python_ok and ffmpeg_ok and ffprobe_ok and editor_ok
     if required_ok:
