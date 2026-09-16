@@ -152,7 +152,7 @@ PYTHONIOENCODING=utf-8 PYTHONUTF8=1 python -X utf8 -m whisper "輸入檔.mp3" \
   --language zh \
   --output_format srt \
   --output_dir ./_subtitles \
-  --initial_prompt "以下為繁體中文。專有名詞：Claude、Claude Code、NotebookLM、Gemini、Groq、Whisper、Obsidian。"
+  --initial_prompt "以下為繁體中文。專有名詞：Claude、Claude Code、Gemini Notebook、Gemini、Groq、Whisper、Obsidian。"
 ```
 
 **Windows 踩坑**：

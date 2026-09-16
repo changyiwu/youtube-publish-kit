@@ -84,7 +84,7 @@ youtube-publish-kit/
 - 要當硬關卡就直接跑 `python skills/youtube-video-workflow/scripts/check_sync.py`，不一致 exit 1
 - 新增或刪除共用檔案時，**同時更新 `check_sync.py` 的 `MANIFEST`**（要共用）或 `EXEMPT`（不共用，例如只在單步驟技能裡的測試）。沒登記會直接讓檢查失敗，這是刻意的
 
-單步驟需求（只想轉字幕、只想去靜音）一律走**本 repo 內的單步驟技能**，跑一次 `sync-skills` 裝到全域後，在任何資料夾都能觸發。**不要為此另開或依賴外部 repo**——`agents/audio-to-srt` 是本 repo 字幕技能的前身，改良已全數併入（dc4cb12），該專案待退役，不得反向依賴。
+單步驟需求（只想轉字幕、只想去靜音）一律走**本 repo 內的單步驟技能**，跑一次 `sync-skills` 裝到全域後，在任何資料夾都能觸發。**不要為此另開或依賴外部 repo**——`agents/audio-to-srt` 是本 repo 字幕技能的前身，程式改良（dc4cb12）與個人化詞彙表都已併入，該專案待退役，不得反向依賴。
 
 同步技能到四個 Agent 的全域目錄：用全域 `sync-skills` 技能。
 
