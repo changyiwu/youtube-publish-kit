@@ -58,14 +58,15 @@ description: 通用的 YouTube 影片自動化生產總控技能，四種 agent�
 - 不增刪字幕段落、不改時間碼。`validate_srt.py` 未通過就停止交付。
 - 每次生人物封面都**重新讀取原始人物基準照**，不沿用舊封面或衍生圖片。
 - PowerShell 路徑一律用 `-LiteralPath` 或完整引號，避免空白與 `[Claude]` 這類中括號被當萬用字元。
+- **路徑分隔符一律正斜線**。macOS 的反斜線是合法檔名字元、不是分隔符，`Test-Path` 會靜默回 `False`；正斜線在 Windows 與 macOS 的 pwsh 都通。
 
 ---
 
 ## 0. 執行前檢查
 
 ```powershell
-$SkillDir = (Resolve-Path ".\skills\youtube-video-workflow").Path
-python "$SkillDir\scripts\preflight.py"
+$SkillDir = (Resolve-Path "./skills/youtube-video-workflow").Path
+python "$SkillDir/scripts\preflight.py"
 ```
 
 技能裝在全域位置時，把 `$SkillDir` 設成實際 `SKILL.md` 的父資料夾。缺 Python、ffmpeg、ffprobe 或 auto-editor 時依輸出修正後再繼續。
@@ -80,9 +81,9 @@ python "$SkillDir\scripts\preflight.py"
 4. 使用者確認後才用相同參數剪完整片。
 
 ```powershell
-python "$SkillDir\scripts\smart_cut.py" `
-  "raw\<video-id>\source.mp4" `
-  --out "working\<video-id>\<video-id>.cut.mp4" `
+python "$SkillDir/scripts\smart_cut.py" `
+  "raw/<video-id>/source.mp4" `
+  --out "working/<video-id>/<video-id>.cut.mp4" `
   --threshold 0.04 `
   --margin "0.25sec,0.25sec"
 ```
@@ -94,14 +95,14 @@ python "$SkillDir\scripts\smart_cut.py" `
 ## 2. Groq 字幕管線
 
 ```powershell
-$Work = "working\<video-id>"
-$Cut  = "$Work\<video-id>.cut.mp4"
-$Sub  = "$Work\_subtitles"
+$Work = "working/<video-id>"
+$Cut  = "$Work/<video-id>.cut.mp4"
+$Sub  = "$Work/_subtitles"
 
-python "$SkillDir\scripts\transcribe_groq.py" $Cut --out "$Sub\raw.json"
-python "$SkillDir\scripts\resegment.py" "$Sub\raw.json" --audio $Cut --out "$Sub\raw.srt"
-python "$SkillDir\scripts\apply_vocab.py" "$Sub\raw.srt" --out "$Sub\vocab.srt"
-python "$SkillDir\scripts\find_dubious_terms.py" "$Sub\vocab.srt" --out "$Sub\dubious-terms.md"
+python "$SkillDir/scripts\transcribe_groq.py" $Cut --out "$Sub/raw.json"
+python "$SkillDir/scripts\resegment.py" "$Sub/raw.json" --audio $Cut --out "$Sub/raw.srt"
+python "$SkillDir/scripts\apply_vocab.py" "$Sub/raw.srt" --out "$Sub/vocab.srt"
+python "$SkillDir/scripts\find_dubious_terms.py" "$Sub/vocab.srt" --out "$Sub/dubious-terms.md"
 ```
 
 `transcribe_groq.py` 在檔案超過 Groq 上限時會用 ffmpeg 產 16 kHz／mono／32 kbps 暫存音訊，不動原檔。可直接餵 `cut.mp4`，不必自己先抽音訊。
@@ -113,14 +114,14 @@ python "$SkillDir\scripts\find_dubious_terms.py" "$Sub\vocab.srt" --out "$Sub\du
 3. 收到確認後套用修正：
 
 ```powershell
-python "$SkillDir\scripts\finalize_subtitles.py" "$Sub\vocab.srt" `
-  --out "$Sub\clean.srt" `
+python "$SkillDir/scripts\finalize_subtitles.py" "$Sub/vocab.srt" `
+  --out "$Sub/clean.srt" `
   --replace "舊字->新字" `
   --replace "390:AGE->Agent"
 
-python "$SkillDir\scripts\validate_srt.py" --raw "$Sub\vocab.srt" --clean "$Sub\clean.srt"
-python "$SkillDir\scripts\srt_to_txt.py" "$Sub\clean.srt" --out "$Work\<video-id>.txt"
-Copy-Item -LiteralPath "$Sub\clean.srt" -Destination "$Work\<video-id>.srt" -Force
+python "$SkillDir/scripts\validate_srt.py" --raw "$Sub/vocab.srt" --clean "$Sub/clean.srt"
+python "$SkillDir/scripts\srt_to_txt.py" "$Sub/clean.srt" --out "$Work/<video-id>.txt"
+Copy-Item -LiteralPath "$Sub/clean.srt" -Destination "$Work/<video-id>.srt" -Force
 ```
 
 段落限定替換用 `段號:舊->新` 格式（例 `390:AGE->Agent`），避免誤傷（如 Gemini 裡的 Gem）。
@@ -154,10 +155,10 @@ Copy-Item -LiteralPath "$Sub\clean.srt" -Destination "$Work\<video-id>.srt" -For
 **沒有內建生圖（Claude Code／OpenCode）**：
 
 ```powershell
-python skills\cover-image\draw.py "<prompt>" `
-  --edit "assets\persona\<你的人物照>.png" `
+python skills/cover-image/draw.py "<prompt>" `
+  --edit "assets/persona/<你的人物照>.png" `
   --size 1536x1024 --quality low `
-  --name cover --outdir "output\<標題> [<Agent>]"
+  --name cover --outdir "output/<標題> [<Agent>]"
 ```
 
 跑完刪掉時間戳檔名版本，只留一份 `cover.png`，並用 Read 看一眼確認人物樣貌與主色正確。
@@ -209,15 +210,15 @@ output/<標題> [<Agent>]/
 4. **切片組片**（切點對齊字幕段落邊界）：
 
 ```powershell
-python "$SkillDir\scripts\clip_cut.py" `
-  --input-mp4 "$Work\<video-id>.cut.mp4" `
-  --input-srt "$Work\<video-id>.srt" `
+python "$SkillDir/scripts\clip_cut.py" `
+  --input-mp4 "$Work/<video-id>.cut.mp4" `
+  --input-srt "$Work/<video-id>.srt" `
   --segments "00:00:08.500-00:00:13.200,00:00:45.100-00:01:30.800" `
-  --out-dir "$Work\short-tmp"
+  --out-dir "$Work/short-tmp"
 
-python "$SkillDir\scripts\add_end_card.py"   --input-mp4 "$Work\short-tmp\short.mp4" --output-mp4 "$Work\short-tmp\short-with-card.mp4"
-python "$SkillDir\scripts\burn_subtitles.py" "$Work\short-tmp\short-with-card.mp4" "$Work\short-tmp\short.srt" "$Work\short-tmp\short-subtitled.mp4"
-python "$SkillDir\scripts\make_vertical.py"  "$Work\short-tmp\short-subtitled.mp4" --out "$Work\short-tmp\short-9x16.mp4"
+python "$SkillDir/scripts\add_end_card.py"   --input-mp4 "$Work/short-tmp\short.mp4" --output-mp4 "$Work/short-tmp\short-with-card.mp4"
+python "$SkillDir/scripts\burn_subtitles.py" "$Work/short-tmp\short-with-card.mp4" "$Work/short-tmp\short.srt" "$Work/short-tmp\short-subtitled.mp4"
+python "$SkillDir/scripts\make_vertical.py"  "$Work/short-tmp\short-subtitled.mp4" --out "$Work/short-tmp\short-9x16.mp4"
 ```
 
 5. **短片標題**：出 3 個更短更聳動的候選等使用者選（短片不需要 10 個）。

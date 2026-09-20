@@ -36,7 +36,7 @@
 驗證：
 
 ```powershell
-python ".\skills\youtube-video-workflow\scripts\preflight.py"
+python "./skills/youtube-video-workflow/scripts/preflight.py"
 ```
 
 ## 3. Groq API key
