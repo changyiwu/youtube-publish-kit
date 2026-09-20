@@ -42,7 +42,7 @@ description: 通用的 YouTube 影片自動化生產總控技能，四種 agent�
 
 1. 把 `SKILL.md` 所在資料夾解析為 `<SKILL_DIR>`（技能可能裝在專案內，也可能裝在全域技能目錄）。
 2. 把目前工作目錄解析為 `<PROJECT_ROOT>`。
-3. 開工前先讀（存在才讀，不存在就跳過）：`AGENTS.md`、`HANDOFF.md`、`README.md`。
+3. 開工前先讀（存在才讀，不存在就跳過）：`AGENTS.md`、`handoff.md`、`README.md`。
 4. 預設資料夾：輸入 `raw/<video-id>/`、中間檔 `working/<video-id>/`、交付 `output/<標題> [<Agent>]/`。
 5. 影片、音訊、API key 一律不進 Git。
 
@@ -197,7 +197,7 @@ output/<標題> [<Agent>]/
 - [ ] SRT 通過 `validate_srt.py`
 - [ ] cover.png 為 16:9、人物延續基準照、主色正確
 - [ ] metadata.md 含「全部一次貼」整合版標籤
-- [ ] `HANDOFF.md` 已更新本支影片狀態、輸出位置、待審事項、下一步
+- [ ] `handoff.md` 已更新本支影片狀態、輸出位置、待審事項、下一步
 
 ## 6. 短片流程（可選）
 

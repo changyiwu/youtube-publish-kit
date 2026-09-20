@@ -49,7 +49,12 @@ generated/
 .claude/worktrees/
 
 # 交接檔含真實電腦名與本機路徑，只走雲端硬碟同步，不進公開 repo
+handoff.md
+# 大寫舊名與改名過渡用的暫存名：雲端硬碟套用不了純大小寫改名，
+# 所以走 HANDOFF.md → handoff-tmp.md →（等同步）→ handoff.md 兩段式。
+# 過渡結束後這兩行可以刪。
 HANDOFF.md
+handoff-tmp.md
 
 # Claude Code 本機權限設定（個人設定，不進 repo）
 .claude/settings.local.json

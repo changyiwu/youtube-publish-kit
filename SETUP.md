@@ -136,19 +136,19 @@ python -c "import os, pathlib; f=pathlib.Path('~/.groq_api_key').expanduser(); k
 
 agent 會：
 
-1. 讀 `HANDOFF.md`（看上次到哪 — 你應該看到「沒有進行中的影片」）
+1. 讀 `handoff.md`（看上次到哪 — 你應該看到「沒有進行中的影片」）
 2. 讀 `AGENTS.md`（工作規範）
 3. 用 45 秒樣本試剪 → 你確認節奏 → 剪全片
 4. 轉字幕 → **停下來**把有疑慮的專有名詞列給你勘誤
 5. 生 10 個標題 → **停下來**等你挑
 6. 你挑完 → 建資料夾 → 平行產封面 + metadata → 打包
-7. 收工前更新 `HANDOFF.md`
+7. 收工前更新 `handoff.md`
 
 ---
 
 ## 7. 多 agent 接力
 
-四種 agent 都讀同一份 `AGENTS.md`、寫同一份 `HANDOFF.md`。
+四種 agent 都讀同一份 `AGENTS.md`、寫同一份 `handoff.md`。
 
 **重要：兩個 agent 不要同時動同一支影片**，會搶檔案、搶 commit。
 

@@ -214,9 +214,9 @@ python skills/short-video-workflow/scripts/make_vertical.py \
 - [ ] 直式版解析度 1080×1920（make_vertical.py 會自動驗證）
 - [ ] cover.png 主色符合 `cover-style.md` 的配色規則
 - [ ] metadata.md 含 `#Shorts` 標籤
-- [ ] HANDOFF.md 已更新本支短片狀態
+- [ ] handoff.md 已更新本支短片狀態
 
-### Step 12：更新 HANDOFF.md
+### Step 12：更新 handoff.md
 
 紀錄：
 - 短片標題

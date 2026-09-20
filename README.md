@@ -36,7 +36,7 @@ raw/<video-id>/source.mp4
 |-------|---------|
 | **Codex** / **OpenCode** / **Antigravity** | [`AGENTS.md`](./AGENTS.md)（原生就讀這份） |
 | **Claude Code** | [`CLAUDE.md`](./CLAUDE.md) → 橋接到 `AGENTS.md` |
-| 交班 | 全部讀寫 `HANDOFF.md`（**不進 git**，只走雲端硬碟同步；clone 下來的人自己建一份） |
+| 交班 | 全部讀寫 `handoff.md`（**不進 git**，只走雲端硬碟同步；clone 下來的人自己建一份） |
 
 **工作規範只有一份 `AGENTS.md`**；`CLAUDE.md` 只放 Claude Code 的差異（封面路線、輸出後綴）。
 

@@ -1,6 +1,6 @@
 # youtube-publish-kit（專案藍圖）
 
-> 本檔為跨 Agent 通用的專案藍圖（AGENTS.md 開放標準）。任何 Agent 的每個 session 都應先讀本檔＋`HANDOFF.md`。
+> 本檔為跨 Agent 通用的專案藍圖（AGENTS.md 開放標準）。任何 Agent 的每個 session 都應先讀本檔＋`handoff.md`。
 > Codex、OpenCode、Antigravity 原生就讀本檔；Claude Code 不讀 `AGENTS.md`，改由 `CLAUDE.md` 的 `@AGENTS.md` import 進來，Claude 專屬規範寫在 `CLAUDE.md`。
 
 ## 專案簡介
@@ -26,7 +26,7 @@
 youtube-publish-kit/
 ├── AGENTS.md         # 本檔 — 跨 Agent 專案藍圖
 ├── CLAUDE.md         # Claude Code 橋接（@AGENTS.md + Claude 專屬）
-├── HANDOFF.md        # 交接檔（不進 git，只走雲端硬碟同步）
+├── handoff.md        # 交接檔（不進 git，只走雲端硬碟同步）
 ├── README.md         # 對人的快速說明
 ├── SETUP.md          # 安裝、API key、個人化清單
 ├── .env.example      # API key 範本（真正的 .env 不進 git）
@@ -100,7 +100,7 @@ youtube-publish-kit/
 6. **選定後**：清洗標題成合法資料夾名（去掉 `？！：／＼?!:/\<>|"*`）→ 建 `output/<標題> [<Agent>]/`，平行產出封面與 `metadata.md`
 7. **打包**：`<標題>.mp4`／`.srt`／`.txt`／`cover.png`／`metadata.md` 五件套
 8. **（可選）短片**：接 `skills/short-video-workflow/`，輸出 `output/<短片標題> [<Agent>] (Short)/`，7 件套（含 9:16 直式版）
-9. **更新 `HANDOFF.md`**
+9. **更新 `handoff.md`**
 
 `metadata.md` **必含「YouTube 標籤欄位（直接複製）」的逗號分隔版與「全部一次貼」整合版**。
 
@@ -161,7 +161,7 @@ youtube-publish-kit/
 
 | 層級 | 平台 | 位置 | 讀取時機 |
 |------|------|------|---------|
-| L1 | 本地（GDrive） | `AGENTS.md`＋`HANDOFF.md`（不進 git，只走雲端硬碟）＋`CLAUDE.md`（橋接） | 每個 session |
+| L1 | 本地（GDrive） | `AGENTS.md`＋`handoff.md`（不進 git，只走雲端硬碟）＋`CLAUDE.md`（橋接） | 每個 session |
 | L2 | GitHub | [changyiwu/youtube-publish-kit](https://github.com/changyiwu/youtube-publish-kit)（公開） | 指定時 |
 | L3 | Obsidian | `youtube-publish-kit/專案工作流程.md` | 有需要時 |
 
@@ -169,11 +169,11 @@ youtube-publish-kit/
 
 | 檔案 | 時效 | 寫入方式 | 放什麼 |
 |------|------|---------|--------|
-| `HANDOFF.md` | **只對下一個 session 有效**，過期即丟 | 每次收工**整份重寫** | 做到哪、下一步、**這次**的暫時 workaround |
+| `handoff.md` | **只對下一個 session 有效**，過期即丟 | 每次收工**整份重寫** | 做到哪、下一步、**這次**的暫時 workaround |
 | `AGENTS.md`（本檔） | **長期有效**，每個 session 都適用 | 只有規則本身變了才改 | 目標、路線圖、常設規則、結構 |
 | Obsidian（L3）／`git log` | **歷史**：發生過什麼、為什麼 | 只增不刪 | 決策紀錄、踩坑完整版、逐次進度 |
 
-驗收標準：**`HANDOFF.md` 整份刪掉，不應損失任何長期資訊**——會的話代表該升級進本檔卻沒升級。
+驗收標準：**`handoff.md` 整份刪掉，不應損失任何長期資訊**——會的話代表該升級進本檔卻沒升級。
 
 **本檔不要出現的東西**（會無限膨脹，且開工每次都要重讀）：
 
@@ -183,8 +183,8 @@ youtube-publish-kit/
 
 ## 工作約定
 
-- 任何 Agent、任何電腦：**開工先讀 `HANDOFF.md`，收工必更新 `HANDOFF.md`**
-- `HANDOFF.md` **不進 git**（含真實電腦名與本機絕對路徑），已列入 `.gitignore`，跨電腦靠雲端硬碟同步——不要把它加回版控
+- 任何 Agent、任何電腦：**開工先讀 `handoff.md`，收工必更新 `handoff.md`**
+- `handoff.md` **不進 git**（含真實電腦名與本機絕對路徑），已列入 `.gitignore`，跨電腦靠雲端硬碟同步——不要把它加回版控
 - 修改共用檔案前先讀最新內容，避免覆蓋其他 Agent 的變更
 - **不要假設另一個 Agent 知道你做了什麼**，交接寫得像給陌生人看
 - 所有回應、文件與 commit 訊息使用繁體中文

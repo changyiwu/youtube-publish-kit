@@ -59,7 +59,7 @@ project/
     └── youtube-video-workflow/
 ```
 
-`AGENTS.md`、`HANDOFF.md`、`assets/style/`、`assets/persona/` 都是選用。存在就讀；不存在仍可剪片、轉字幕、產不含真人的封面。
+`AGENTS.md`、`handoff.md`、`assets/style/`、`assets/persona/` 都是選用。存在就讀；不存在仍可剪片、轉字幕、產不含真人的封面。
 
 ## 5. 個人化清單（拿到這份技能的人必看）
 
