@@ -1,7 +1,7 @@
 # youtube-publish-kit（專案藍圖）
 
 > 本檔為跨 Agent 通用的專案藍圖（AGENTS.md 開放標準）。任何 Agent 的每個 session 都應先讀本檔＋`handoff.md`。
-> Codex、OpenCode、Antigravity 原生就讀本檔；Claude Code 不讀 `AGENTS.md`，改由 `CLAUDE.md` 的 `@AGENTS.md` import 進來，Claude 專屬規範寫在 `CLAUDE.md`。
+> Codex、OpenCode、Antigravity 原生就讀本檔；Claude Code 有 `CLAUDE.md` 時只讀它，故由 `CLAUDE.md` 的 `@AGENTS.md` import 進來（`CLAUDE.md` 只有這一行）；Claude 專屬規範寫在本檔〈Claude Code 專屬〉一節。
 
 ## 專案簡介
 
@@ -189,3 +189,10 @@ youtube-publish-kit/
 - **不要假設另一個 Agent 知道你做了什麼**，交接寫得像給陌生人看
 - 所有回應、文件與 commit 訊息使用繁體中文
 - 修改前先確認計畫，優先保留原有資料結構
+
+## Claude Code 專屬
+
+- **封面走 API 路線**：Claude Code 沒有內建生圖，一律跑 `skills/cover-image/draw.py`，
+  需要 `OPENAI_API_KEY`（環境變數或 `~/.openai.env`）。輸出資料夾後綴 ` [Claude]`。
+- **中括號路徑**：PowerShell 會把 `output/<標題> [Claude]/` 的中括號當萬用字元，
+  檔案操作要用 `-LiteralPath` 或單引號；Bash 直接雙引號即可。
